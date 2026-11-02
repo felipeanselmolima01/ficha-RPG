@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ficha de personagem</title>
+<style>
+:root{--bg:#ece8dd;--panel:#dcd7c9;--ink:#1b1f22;--mut:#5d625f;--acc:#2f6f66;--warn:#a2461f;--line:#b3ad9c;--fld:#f4f1e8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--panel:#1d2226;--ink:#e8e4d8;--mut:#8d9490;--acc:#7fb0a5;--warn:#d98159;--line:#343b40;--fld:#12161a}}
+:root[data-theme="dark"]{--bg:#14171a;--panel:#1d2226;--ink:#e8e4d8;--mut:#8d9490;--acc:#7fb0a5;--warn:#d98159;--line:#343b40;--fld:#12161a}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+button,select,input,textarea{font:inherit;color:var(--ink);background:var(--fld);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+button{cursor:pointer;background:var(--panel)}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:600}
+:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{width:100%;resize:vertical;min-height:70px}
+.nome{width:100%;font:700 clamp(28px,6vw,46px)/1.1 Georgia,"Times New Roman",serif;border:0;border-bottom:2px solid var(--line);background:transparent;padding:4px 0}
+.top{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0 18px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
+label.f input,label.f select{color:var(--ink);font-size:15px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 18px}
+h2{font:700 21px Georgia,serif;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.box{background:var(--panel);border-radius:6px;padding:12px;margin-bottom:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0}
+.row span.n{font:600 17px Georgia,serif}
+.bar2{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0}
+.bar2 i{width:14px;height:18px;border:1px solid var(--mut);border-radius:2px;cursor:pointer}
+.bar2 i.on{background:var(--acc);border-color:var(--acc)}
+.big{font:700 28px Georgia,serif}
+.ctl{display:flex;align-items:center;gap:8px}
+.sm{font-size:13px;color:var(--mut)}
+.warn{color:var(--warn);font-weight:600}
+.pers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 22px}
+.habs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:700px){.habs{grid-template-columns:1fr}}
+.pers .row{border-bottom:1px solid var(--line)}
+.pers .tag{font-size:12px;color:var(--mut);margin-left:6px}
+.hab{background:var(--fld);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:4px;padding:8px}
+.hab .h{display:flex;gap:6px}
+.hab .h input:first-child{flex:1;font:700 17px Georgia,serif}
+.hab .h input:nth-child(2){width:110px}
+.hab textarea{margin-top:6px;min-height:54px}
+.code{display:none;background:var(--panel);border:1px solid var(--acc);border-radius:6px;padding:12px;margin-bottom:14px}
+.code.show{display:block}
+.code textarea{min-height:90px;font:12px/1.3 ui-monospace,Menlo,monospace}
+.msg{min-height:20px;font-size:13px;color:var(--acc)}
+:disabled{opacity:.65;cursor:not-allowed}
+.ac{position:absolute;z-index:20;display:none;background:var(--panel);border:1px solid var(--acc);border-radius:4px;max-height:240px;overflow:auto}
+.ac div{padding:7px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.ac div:hover{background:var(--acc);color:var(--bg)}
+.ac small{opacity:.75}
+@media(max-width:520px){.pers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <select id="sel" aria-label="Escolher ficha"></select>
+    <button id="novo">Nova ficha</button>
+    <button id="del">Excluir</button>
+    <button id="cod" class="pri">Código da ficha</button>
+    <input id="pw" type="password" placeholder="Senha do mestre" autocomplete="off" style="width:150px" aria-label="Senha do mestre">
+    <button id="mest">Modo mestre</button>
+    <span class="msg" id="pwm"></span>
+  </div>
+  <div class="code" id="codebox">
+    <p class="sm">Gerar código cria um texto com a ficha atual para enviar ao mestre ou a um jogador. Importar código lê um texto colado aqui e abre a ficha. Se o código for de uma ficha que você já tem, ela é atualizada.</p>
+    <textarea id="code" aria-label="Código da ficha" placeholder="Cole aqui um código para importar"></textarea>
+    <div class="ctl" style="margin-top:8px;flex-wrap:wrap">
+      <button id="gen" class="pri">Gerar código</button>
+      <button id="copy">Copiar</button>
+      <button id="imp">Importar código</button>
+      <span class="msg" id="msg"></span>
+    </div>
+  </div>
+  <datalist id="dl-hab"></datalist><datalist id="dl-per"></datalist>
+  <div class="ac" id="ac"></div>
+  <div id="app"></div>
+</div>
+<script>
+var PER=[["Atletismo","Corpo"],["Briga","Corpo"],["Pontaria","Corpo"],["Furtividade","Corpo"],["Condução","Corpo"],["Conhecimento","Mente"],["Investigação","Mente"],["Medicina","Mente"],["Ofícios","Mente"],["Tecnologia","Mente"],["Intuição","Sentidos"],["Navegação","Sentidos"],["Percepção","Sentidos"],["Reflexos","Sentidos"],["Sobrevivência","Sentidos"],["Atuação","Vontade"],["Disciplina","Vontade"],["Fé","Vontade"],["Intimidação","Vontade"],["Persuasão","Vontade"],["Resistência","Vontade"]].sort(function(a,b){return a[0].localeCompare(b[0],"pt")});
+var ATT=[["corpo","Corpo"],["mente","Mente"],["sentidos","Sentidos"],["vontade","Vontade"]];
+var CAT=[["Passo leve","Passiva","+1 em Furtividade"],["Fôlego","Passiva","+1 em Atletismo"],["Punho pesado","Passiva","+1 em Briga"],["Memória fotográfica","Passiva","+1 em Investigação e Conhecimento ao lembrar do que já viu ou leu"],["Dedos ágeis","Passiva","+1 em Ofícios"],["Ouvido apurado","Passiva","+1 em Percepção para notar sons"],["Senso de direção","Passiva","+1 em Navegação"],["Pavio longo","Passiva","+1 em Disciplina"],["Voz calma","Passiva","+1 em Persuasão"],
+["Bússola interna","Sem custo","Marca um lugar de referência. Sabe a direção e a distância até ele e guia o grupo de volta sem teste, mesmo no escuro. Uma referência por vez; trocar gasta uma ação"],["Caderno de campo","Sem custo","Registra um detalhe. Ao usá-lo em Investigação ou Conhecimento, soma +2. 1x por cena"],["Improviso","Sem custo","Transforma um objeto comum em ferramenta num teste de Ofícios. 1x por cena"],["Mão rápida","Sem custo","Saca, guarda ou recarrega sem gastar ação nem sofrer penalidade. 1x por rodada"],["Olhar duro","Sem custo","Faz um teste de Intimidação sem gastar ação. 1x por cena"],["Palavra de conforto","Sem custo","Aliado em pânico ganha +1 no próximo teste de Disciplina. 1x por cena"],["Passada firme","Sem custo","Move-se em terreno difícil sem penalidade"],["Primeiros socorros","Sem custo","Estabiliza um aliado em 0 PV sem teste. 1x por descanso"],["Respiração controlada","Sem custo","Remove um pânico leve de si mesmo. 1x por cena, gasta a ação"],["Sentinela","Sem custo","Vigia um ponto da cena: o grupo não é surpreendido por nada que venha dali e você nota movimento sem teste. Fica parado e sem outra ação"],
+["Adrenalina","1 PV","Soma 1d4 a um teste de perícia de Corpo"],["Alvo marcado","1 PD","+1 nos ataques contra um inimigo marcado, até o fim da cena"],["Apelo","1 PV","Rerrola um teste de Persuasão ou Intimidação"],["Corrida desesperada","1 PV","Move o dobro nesta ação"],["Dedução rápida","1 PD","Faz ao mestre uma pergunta de sim ou não sobre algo que examina"],["Desvio","1 PV","Soma 1d4 a um teste de Amortecer de PV"],["Instinto de fuga","1 PD","+2 em Reflexos ou Atletismo ao fugir"],["Plano","1 PD","Antes da cena, descreve um plano. Um aliado soma 1d4 ao primeiro teste que o siga"],["Segunda olhada","1 PD","Rerrola um teste de Percepção ou Intuição, ficando com o melhor"],["Segurar a barra","1 PV","Soma 1d4 a um teste de Amortecer de PD, Disciplina ou Resistência"],
+["Aguentar firme","2 PV","Ignora os efeitos de um colapso por uma rodada"],["Diagnóstico","2 PD","Examina um alvo e o mestre revela PV, PD aproximados e condições. O próximo teste de Medicina ou ataque contra ele soma 1d4. O mestre pode recusar"],["Escudo humano","2 PV","Recebe o golpe no lugar de um aliado próximo e rola o Amortecer normalmente"],["Golpe certeiro","2 PV","Rerrola o dado de dano de um ataque e fica com o maior"],["Ler a cena","2 PD","O mestre anuncia a próxima ação de um inimigo à sua escolha"],["Reação","2 PV","Em combate, seu ataque acontece na fase geral, antes de todos"],["Reavaliar","2 PD","Rerrola um teste de Mente e fica com o melhor"],["Sexto sentido","2 PD","Ao ser surpreendido, ainda age normalmente"],["Siga-me","1 PV e 1 PD","Todas as criaturas hostis próximas que possam perceber você focam os ataques em você nesta rodada, com prioridade sobre outras regras de alvo"]];
+var PERS=[["Dedicado","Uma perícia à escolha conta como um grau acima. Só uma perícia pode chegar a d12"],["Autodidata","Duas perícias de Mente sobem um grau cada, nunca além de d8"],["Mão firme","Ofícios, Medicina e Tecnologia contam como d6 no mínimo"],["Pé na estrada","Atletismo, Condução e Navegação contam como d6 no mínimo"],["Inquebrável","Soma 1d4 ao teste de Amortecer de PV"],["Cabeça fria","Soma 1d4 ao teste de Amortecer de PD"],["Calejado","+2 PV máximo"],["Estoico","+2 PD máximo"],["Pele grossa","A primeira lesão de cada cena causa metade do dano, arredondando para cima"],["Calo emocional","O primeiro dano mental de cada sessão cai pela metade"],["Primeiro golpe","Na primeira rodada do combate, soma 1d4 ao dano"],["Sangue frio","+1 no ataque com metade da vida ou menos; +2 com menos de um terço"],["Mira calma","Se não se moveu na rodada, +1 em Pontaria"],["Executor","Ao acertar um inimigo já ferido, +1 ao dano"],["Obstinado","A cada 2 rodadas no mesmo alvo, o dado de ataque sobe um grau (até +2). Trocar de alvo zera. Não sai da luta sozinho"],["Mente blindada","Recupera 1 PD extra em descanso seguro"],["Fé inabalável","Ao usar Fé em outro personagem com sucesso, recupera 1 PD"],["Racional","Duas vezes por sessão, rerrola um teste de Disciplina contra pânico"],["Sono leve","Não pode ser surpreendido enquanto descansa"],["Aproveitador","Consumíveis têm 33% a mais de efeito; sem efeito numérico, +1 carga"],["Âncora","Aliados que você ajuda recuperam 1 PD (teto de 4 por sessão)"],["Líder nato","Quando você ajuda, o ajudante rola d6 em vez de d4"],["Confiável","Ao ajudar um teste, o ajudado pode rerrolar uma vez"],["Paranoico","+2 em Percepção para notar ameaças, mas não recupera PD em descanso se estiver sozinho"],["Impulsivo","Age primeiro na cena, mas tem desvantagem em testes de Disciplina"]];
+var SEC=[["Cartomante"],["Nunca olhe para trás"],["Último a cair"],["Voto de silêncio"],["Calma antes da tempestade"],["Aula de erro"],["Gatilho livre"]];
+var KEY="ficha-rpg-v1",S={sheets:{},cur:null};
+function $(i){return document.getElementById(i)}
+function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function blank(){var p={};PER.forEach(function(x){p[x[0]]=4});return{id:uid(),nome:"",perfil:"",nivel:1,p1:"",p2:"",obj:"",attr:{corpo:6,mente:6,sentidos:6,vontade:6},per:p,pv:16,pd:16,pvAj:0,pdAj:0,pa:0,habs:[{n:"",c:"",e:""},{n:"",c:"",e:""}],sec:{n:"",e:""},equip:"",seq:""}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.sheets&&Object.keys(o.sheets).length)S=o}}catch(e){}
+  if(!S.cur||!S.sheets[S.cur]){if(!Object.keys(S.sheets).length){var b=blank();S.sheets[b.id]=b}S.cur=Object.keys(S.sheets)[0]}}
+function cur(){return S.sheets[S.cur]}
+function dice(v){return[4,6,8,10,12].map(function(d){return'<option value="'+d+'"'+(d==v?" selected":"")+">d"+d+"</option>"}).join("")}
+function opts(a,v){return a.map(function(x){return'<option'+(x==v?" selected":"")+">"+x+"</option>"}).join("")}
+function max(s){return{pv:s.attr.corpo+s.attr.vontade+2+(+s.pvAj||0),pd:s.attr.mente+s.attr.sentidos+5+(+s.pdAj||0)}}
+function def(v){return 6+Math.floor(v/2)}
+function drawSel(){$("sel").innerHTML=Object.keys(S.sheets).map(function(k){var s=S.sheets[k];return'<option value="'+k+'"'+(k==S.cur?" selected":"")+">"+esc(s.nome||"Sem nome")+"</option>"}).join("")}
+function draw(){
+  var s=cur();
+  if(!s.sec)s.sec={n:"",e:""};var nv="";for(var i=1;i<=10;i++)nv+="<option"+(i==s.nivel?" selected":"")+">"+i+"</option>";
+  $("app").innerHTML=
+  '<input class="nome" data-k="nome" placeholder="Nome do personagem" value="'+esc(s.nome)+'" aria-label="Nome">'+
+  '<div class="top">'+
+  '<label class="f">Perfil<select data-k="perfil"><option value="">Escolher</option>'+opts(["Instintivo","Analítico","Atento","Resoluto"],s.perfil)+'</select></label>'+
+  '<label class="f">Nível<select data-k="nivel" data-n="1">'+nv+'</select></label>'+
+  '<label class="f">Personalidade<input data-k="p1" data-ac="per" autocomplete="off" value="'+esc(s.p1)+'"><span class="sm" id="h1"></span></label>'+
+  '<label class="f">Segunda personalidade (nível 5)<input data-k="p2" data-ac="per" autocomplete="off" value="'+esc(s.p2)+'"><span class="sm" id="h2"></span></label>'+
+  '<label class="f" style="grid-column:1/-1">Objetivo de campanha (o mestre preenche)<input data-k="obj" value="'+esc(s.obj)+'"></label></div>'+
+  '<div class="cols">'+
+  '<div class="box"><h2>Atributos</h2>'+ATT.map(function(a){return'<div class="row"><span class="n">'+a[1]+'</span><select data-k="attr.'+a[0]+'" data-n="1">'+dice(s.attr[a[0]])+"</select></div>"}).join("")+'<div class="sm" id="sta"></div></div>'+
+  '<div class="box"><h2>Pontos de Vida</h2><div class="ctl"><button data-pv="pv-1" aria-label="Menos 1 PV">−</button><span class="big" id="pvt"></span><button data-pv="pv1" aria-label="Mais 1 PV">+</button></div><div class="bar2" id="pvb"></div>'+
+  '<label class="f">Ajuste do máximo (sequelas, bônus)<input type="number" data-k="pvAj" data-n="1" value="'+(+s.pvAj||0)+'"></label></div>'+
+  '<div class="box"><h2>Pontos de Determinação</h2><div class="ctl"><button data-pv="pd-1" aria-label="Menos 1 PD">−</button><span class="big" id="pdt"></span><button data-pv="pd1" aria-label="Mais 1 PD">+</button></div><div class="bar2" id="pdb"></div>'+
+  '<label class="f">Ajuste do máximo (traumas, bônus)<input type="number" data-k="pdAj" data-n="1" value="'+(+s.pdAj||0)+'"></label></div>'+
+  '<div class="box"><h2>Defesa e armadura</h2><div class="row"><span>Defesa física</span><b id="df"></b></div><div class="row"><span>Defesa mental</span><b id="dm"></b></div>'+
+  '<label class="f">Pontos de armadura restantes<input type="number" min="0" data-k="pa" data-n="1" value="'+(+s.pa||0)+'"></label></div>'+
+  '<div class="box" style="grid-column:1/-1"><h2>Perícias</h2><div class="pers">'+PER.map(function(x){return'<div class="row"><span>'+x[0]+'<span class="tag">'+x[1]+'</span></span><select data-k="per.'+x[0]+'" data-n="1">'+dice(s.per[x[0]])+"</select></div>"}).join("")+'</div><div class="sm" id="stp" style="margin-top:8px"></div><div class="warn sm" id="pmsg"></div></div>'+
+  '<div class="box" style="grid-column:1/-1"><h2>Habilidades</h2><div class="habs">'+s.habs.map(function(h,i){return'<div class="hab"><div class="h"><input data-k="habs.'+i+'.n" data-ac="hab" autocomplete="off" placeholder="Nome (digite para buscar)" value="'+esc(h.n)+'"><input data-k="habs.'+i+'.c" placeholder="Custo" value="'+esc(h.c)+'"><button data-rm="'+i+'" aria-label="Remover habilidade">✕</button></div><textarea data-k="habs.'+i+'.e" placeholder="O que faz">'+esc(h.e)+"</textarea></div>"}).join("")+'</div><button id="addh" style="margin-top:10px">Nova habilidade</button></div>'+
+  '<div class="box" id="secbox" style="grid-column:1/-1"><h2>Habilidade secreta</h2><div class="hab"><div class="h"><input data-k="sec.n" data-ac="sec" autocomplete="off" placeholder="???" value="'+esc(s.sec.n)+'"></div><textarea data-k="sec.e" placeholder="???">'+esc(s.sec.e)+'</textarea></div><div class="sm">O mestre preenche este campo quando o objetivo de campanha é cumprido.</div></div></div><div class="cols"><div class="box"><h2>Equipamento</h2><textarea data-k="equip" placeholder="Armas, proteção, consumíveis, lanterna">'+esc(s.equip)+'</textarea></div>'+
+  '<div class="box"><h2>Sequelas e traumas</h2><textarea data-k="seq">'+esc(s.seq)+'</textarea></div></div>';
+  upd();
+}
+function bar(id,k,cur,mx){var h="";for(var i=0;i<Math.max(mx,0);i++)h+='<i data-b="'+k+'" data-i="'+i+'" class="'+(i<cur?"on":"")+'" role="button" aria-label="Definir '+k.toUpperCase()+" "+(i+1)+'"></i>';$(id).innerHTML=h}
+function upd(){
+  var s=cur(),m=max(s);
+  s.pv=Math.max(0,Math.min(s.pv,m.pv));s.pd=Math.max(0,Math.min(s.pd,m.pd));
+  $("pvt").textContent=s.pv+" / "+m.pv;$("pdt").textContent=s.pd+" / "+m.pd;
+  bar("pvb","pv",s.pv,m.pv);bar("pdb","pd",s.pd,m.pd);
+  $("df").textContent=def(s.per.Reflexos);$("dm").textContent=def(s.per.Disciplina);
+  var st=0,d4=0;ATT.forEach(function(a){var v=s.attr[a[0]];if(v==4){d4++;st-=1}else st+=(v-6)/2});
+  var ap=2+(s.nivel>=5?1:0);
+  $("sta").innerHTML='Passos de atributo: <span class="'+(st>ap||d4>1?"warn":"")+'">'+st+" de "+ap+"</span> (só um atributo pode ficar em d4, e d4 devolve 1 passo)";
+  var sp=0;PER.forEach(function(x){sp+=(s.per[x[0]]-4)/2});
+  var pp=10+(s.nivel>=3?3:0)+(s.nivel>=7?3:0),n12=PER.filter(function(x){return s.per[x[0]]===12}).length;
+  $("stp").innerHTML='Passos de perícia: <span class="'+(sp>pp?"warn":"")+'">'+sp+" de "+pp+"</span> (criação: 10, mais 3 nos níveis 3 e 7). Perícias em d12: "+n12+" de 1"+(n12&&s.nivel<7?" (o d12 só vale a partir do nível 7)":"");
+  ["p1","p2"].forEach(function(k,i){var e=PERS.filter(function(x){return x[0].toLowerCase()===String(s[k]).toLowerCase()})[0];$("h"+(i+1)).textContent=e?e[1]:""});lockUI();$("secbox").style.display=+s.nivel>=8?"":"none";drawSel();save();
+}
+function setp(s,path,v){var p=path.split("."),o=s;for(var i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=v}
+$("app").addEventListener("input",function(e){var t=e.target,k=t.getAttribute("data-k");if(!k)return;var v=t.getAttribute("data-n")?(+t.value||0):t.value;if(k.indexOf("per.")===0){var o0=cur().per[k.slice(4)],er=v>o0?permit(cur(),k.slice(4),v):"";if(er){t.value=String(o0);pmsg(er);return}}setp(cur(),k,v);var m=k.match(/^habs\.(\d+)\.n$/);if(m){var c=CAT.filter(function(x){return x[0].toLowerCase()===String(v).toLowerCase()})[0];if(c){var h=cur().habs[m[1]];h.n=c[0];h.c=c[1];h.e=c[2];var ci=document.querySelector('[data-k="habs.'+m[1]+'.c"]'),ei=document.querySelector('[data-k="habs.'+m[1]+'.e"]');if(ci)ci.value=c[1];if(ei)ei.value=c[2]}}upd()});
+$("app").addEventListener("change",function(e){var t=e.target;if(t.getAttribute("data-k")==="nivel"||t.getAttribute("data-k")==="attr.corpo"||t.getAttribute("data-k")==="attr.vontade"||t.getAttribute("data-k")==="attr.mente"||t.getAttribute("data-k")==="attr.sentidos")upd()});
+$("app").addEventListener("click",function(e){
+  var t=e.target,s=cur(),a=t.getAttribute("data-pv"),b=t.getAttribute("data-b"),r=t.getAttribute("data-rm");
+  if(a){var k=a.slice(0,2),d=+a.slice(2);s[k]+=d;upd()}
+  else if(b){var i=+t.getAttribute("data-i");s[b]=(s[b]==i+1)?i:i+1;upd()}
+  else if(r!==null){s.habs.splice(+r,1);draw()}
+  else if(t.id==="addh"){s.habs.push({n:"",c:"",e:""});draw()}
+});
+$("sel").addEventListener("change",function(){S.cur=$("sel").value;draw()});
+$("novo").addEventListener("click",function(){var b=blank();S.sheets[b.id]=b;S.cur=b.id;draw()});
+$("del").addEventListener("click",function(){var s=cur();if(!confirm("Excluir a ficha de "+(s.nome||"sem nome")+"? Gere o código antes se quiser guardar uma cópia."))return;delete S.sheets[S.cur];S.cur=null;load();draw()});
+$("cod").addEventListener("click",function(){$("codebox").classList.toggle("show")});
+function msg(t){$("msg").textContent=t}
+$("gen").addEventListener("click",function(){$("code").value="FICHA1:"+btoa(unescape(encodeURIComponent(JSON.stringify(cur()))));msg("Código gerado. Copie e envie.")});
+$("copy").addEventListener("click",function(){var ta=$("code");if(!ta.value){msg("Gere um código primeiro.");return}ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}
+  if(!ok&&navigator.clipboard){navigator.clipboard.writeText(ta.value).then(function(){msg("Copiado.")},function(){msg("Selecione o texto e copie manualmente.")});return}msg(ok?"Copiado.":"Selecione o texto e copie manualmente.")});
+$("imp").addEventListener("click",function(){
+  var v=$("code").value.trim();if(v.indexOf("FICHA1:")!==0){msg("Esse texto não é um código de ficha.");return}
+  try{var o=JSON.parse(decodeURIComponent(escape(atob(v.slice(7)))));if(!o||!o.id||!o.attr||!o.per)throw 0;
+    var b=blank();o.per=Object.assign(b.per,o.per);o.habs=o.habs||[];S.sheets[o.id]=o;S.cur=o.id;draw();msg("Ficha de "+(o.nome||"sem nome")+" importada.")}
+  catch(e){msg("Código inválido. Confira se foi colado por inteiro.")}});
+$("dl-hab").innerHTML=CAT.map(function(x){return'<option value="'+esc(x[0])+'">'+esc(x[1])+"</option>"}).join("");$("dl-per").innerHTML=PERS.map(function(x){return'<option value="'+esc(x[0])+'"></option>'}).join("");
+function pmsg(t){var e=$("pmsg");if(e){e.textContent=t;clearTimeout(pmsg.t);pmsg.t=setTimeout(function(){e.textContent=""},6000)}}
+function permit(s,name,v){var st=0;PER.forEach(function(x){st+=((x[0]===name?v:s.per[x[0]])-4)/2});
+  var al=10+(s.nivel>=3?3:0)+(s.nivel>=7?3:0);
+  if(st>al)return "Limite do nível "+s.nivel+": "+al+" passos de perícia. Suba o nível ou reduza outra perícia.";
+  if(v===12){if(s.nivel<7)return "O d12 (Grão-mestre) só é liberado no nível 7.";
+    if(PER.filter(function(x){return x[0]!==name&&s.per[x[0]]===12}).length>=1)return "Só uma perícia pode ser d12."}
+  return ""}
+var M=false,HASH="d6026269563ac271ef79dcfa719e06f7299478dc0c90ba2cfa593ca6f7830379",SALT="rpg-ficha:";
+function sha(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")})}
+function lockUI(){["nivel","obj","sec.n","sec.e"].forEach(function(k){var e=document.querySelector('[data-k="'+k+'"]');if(e)e.disabled=!M});$("mest").textContent=M?"Sair do modo mestre":"Modo mestre";$("pw").style.display=M?"none":""}
+$("mest").addEventListener("click",function(){var m=$("pwm");if(M){M=false;m.textContent="";lockUI();return}
+  if(!window.crypto||!crypto.subtle){m.textContent="Este navegador não permite verificar a senha.";return}
+  sha(SALT+$("pw").value).then(function(h){if(h===HASH){M=true;$("pw").value="";m.textContent="Modo mestre ativo.";lockUI()}else{m.textContent="Senha incorreta."}})});
+$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")$("mest").click()});
+function norm(t){return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+var AC=null,skip=false;
+function acHide(){$("ac").style.display="none";AC=null}
+function acShow(t){var type=t.getAttribute("data-ac"),src=type==="hab"?CAT:type==="sec"?SEC:PERS,q=norm(t.value);
+  var r=src.filter(function(x){return norm(x[0]).indexOf(q)>=0}).sort(function(a,b){return (norm(a[0]).indexOf(q)!==0)-(norm(b[0]).indexOf(q)!==0)});
+  if(!r.length){acHide();return}
+  var b=$("ac"),p=t.getBoundingClientRect();
+  b.innerHTML=r.map(function(x,i){return'<div data-i="'+i+'">'+esc(x[0])+(type==="hab"?"<small>"+esc(x[1])+"</small>":"")+"</div>"}).join("");
+  b.style.left=(p.left+window.scrollX)+"px";b.style.top=(p.bottom+window.scrollY)+"px";b.style.minWidth=p.width+"px";b.style.display="block";AC={t:t,r:r}}
+$("ac").addEventListener("mousedown",function(e){e.preventDefault();var d=e.target.closest("[data-i]");if(!d||!AC)return;var t=AC.t,x=AC.r[+d.getAttribute("data-i")];t.value=x[0];skip=true;t.dispatchEvent(new Event("input",{bubbles:true}));skip=false;acHide()});
+$("app").addEventListener("input",function(e){if(!skip&&e.target.getAttribute("data-ac"))acShow(e.target)});
+$("app").addEventListener("focusin",function(e){if(e.target.getAttribute("data-ac"))acShow(e.target)});
+document.addEventListener("mousedown",function(e){if(!e.target.closest("#ac")&&!e.target.getAttribute("data-ac"))acHide()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")acHide()});
+load();draw();
+</script>
+</body>
+</html>
