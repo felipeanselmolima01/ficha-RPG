@@ -100,7 +100,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.sheets&&Object.keys(o.sheets).length)S=o}}catch(e){}
   if(!S.cur||!S.sheets[S.cur]){if(!Object.keys(S.sheets).length){var b=blank();S.sheets[b.id]=b}S.cur=Object.keys(S.sheets)[0]}}
 function cur(){return S.sheets[S.cur]}
-function dice(v){return[4,6,8,10,12].map(function(d){return'<option value="'+d+'"'+(d==v?" selected":"")+">d"+d+"</option>"}).join("")}
+function dice(v,kind){var s=cur();return[4,6,8,10,12].filter(function(d){if(d!==12||v===12)return true;if(kind==="a")return s.nivel>=5;if(kind==="p")return s.nivel>=7&&!PER.some(function(x){return s.per[x[0]]===12});return true}).map(function(d){return'<option value="'+d+'"'+(d==v?" selected":"")+">d"+d+"</option>"}).join("")}
 function opts(a,v){return a.map(function(x){return'<option'+(x==v?" selected":"")+">"+x+"</option>"}).join("")}
 function max(s){return{pv:s.attr.corpo+s.attr.vontade+2+(+s.pvAj||0),pd:s.attr.mente+s.attr.sentidos+5+(+s.pdAj||0)}}
 function def(v){return 6+Math.floor(v/2)}
@@ -117,17 +117,17 @@ function draw(){
   '<label class="f">Segunda personalidade (nível 5)<input data-k="p2" data-ac="per" autocomplete="off" value="'+esc(s.p2)+'"><span class="sm" id="h2"></span></label>'+
   '<label class="f" style="grid-column:1/-1">Objetivo de campanha (o mestre preenche)<input data-k="obj" value="'+esc(s.obj)+'"></label></div>'+
   '<div class="cols">'+
-  '<div class="box"><h2>Atributos</h2>'+ATT.map(function(a){return'<div class="row"><span class="n">'+a[1]+'</span><select data-k="attr.'+a[0]+'" data-n="1">'+dice(s.attr[a[0]])+"</select></div>"}).join("")+'<div class="sm" id="sta"></div></div>'+
+  '<div class="box"><h2>Atributos</h2>'+ATT.map(function(a){return'<div class="row"><span class="n">'+a[1]+'</span><select data-k="attr.'+a[0]+'" data-n="1">'+dice(s.attr[a[0]],"a")+"</select></div>"}).join("")+'<div class="sm" id="sta"></div></div>'+
   '<div class="box"><h2>Pontos de Vida</h2><div class="ctl"><button data-pv="pv-1" aria-label="Menos 1 PV">−</button><span class="big" id="pvt"></span><button data-pv="pv1" aria-label="Mais 1 PV">+</button></div><div class="bar2" id="pvb"></div>'+
   '<label class="f">Ajuste do máximo (sequelas, bônus)<input type="number" data-k="pvAj" data-n="1" value="'+(+s.pvAj||0)+'"></label></div>'+
   '<div class="box"><h2>Pontos de Determinação</h2><div class="ctl"><button data-pv="pd-1" aria-label="Menos 1 PD">−</button><span class="big" id="pdt"></span><button data-pv="pd1" aria-label="Mais 1 PD">+</button></div><div class="bar2" id="pdb"></div>'+
   '<label class="f">Ajuste do máximo (traumas, bônus)<input type="number" data-k="pdAj" data-n="1" value="'+(+s.pdAj||0)+'"></label></div>'+
   '<div class="box"><h2>Defesa e armadura</h2><div class="row"><span>Defesa física</span><b id="df"></b></div><div class="row"><span>Defesa mental</span><b id="dm"></b></div>'+
   '<label class="f">Pontos de armadura restantes<input type="number" min="0" data-k="pa" data-n="1" value="'+(+s.pa||0)+'"></label></div>'+
-  '<div class="box" style="grid-column:1/-1"><h2>Perícias</h2><div class="pers">'+PER.map(function(x){return'<div class="row"><span>'+x[0]+'<span class="tag">'+x[1]+'</span></span><select data-k="per.'+x[0]+'" data-n="1">'+dice(s.per[x[0]])+"</select></div>"}).join("")+'</div><div class="sm" id="stp" style="margin-top:8px"></div><div class="warn sm" id="pmsg"></div></div>'+
+  '<div class="box" style="grid-column:1/-1"><h2>Perícias</h2><div class="pers">'+PER.map(function(x){return'<div class="row"><span>'+x[0]+'<span class="tag">'+x[1]+'</span></span><select data-k="per.'+x[0]+'" data-n="1">'+dice(s.per[x[0]],"p")+"</select></div>"}).join("")+'</div><div class="sm" id="stp" style="margin-top:8px"></div><div class="warn sm" id="pmsg"></div></div>'+
   '<div class="box" style="grid-column:1/-1"><h2>Habilidades</h2><div class="habs">'+s.habs.map(function(h,i){return'<div class="hab"><div class="h"><input data-k="habs.'+i+'.n" data-ac="hab" autocomplete="off" placeholder="Nome (digite para buscar)" value="'+esc(h.n)+'"><input data-k="habs.'+i+'.c" placeholder="Custo" value="'+esc(h.c)+'"><button data-rm="'+i+'" aria-label="Remover habilidade">✕</button></div><textarea data-k="habs.'+i+'.e" placeholder="O que faz">'+esc(h.e)+"</textarea></div>"}).join("")+'</div><button id="addh" style="margin-top:10px">Nova habilidade</button></div>'+
   '<div class="box" id="secbox" style="grid-column:1/-1"><h2>Habilidade secreta</h2><div class="hab"><div class="h"><input data-k="sec.n" data-ac="sec" autocomplete="off" placeholder="???" value="'+esc(s.sec.n)+'"></div><textarea data-k="sec.e" placeholder="???">'+esc(s.sec.e)+'</textarea></div><div class="sm">O mestre preenche este campo quando o objetivo de campanha é cumprido.</div></div></div><div class="cols"><div class="box"><h2>Equipamento</h2><textarea data-k="equip" placeholder="Armas, proteção, consumíveis, lanterna">'+esc(s.equip)+'</textarea></div>'+
-  '<div class="box"><h2>Sequelas e traumas</h2><textarea data-k="seq">'+esc(s.seq)+'</textarea></div></div>';
+  '<div class="box"><h2>Sequelas e traumas</h2><textarea data-k="seq">'+esc(s.seq)+'</textarea></div><div class="box" style="grid-column:1/-1"><h2>História de vida</h2><textarea data-k="lore" style="min-height:130px" placeholder="Quem é o personagem, de onde veio, o que perdeu, o que teme">'+esc(s.lore||"")+'</textarea></div></div>';
   upd();
 }
 function bar(id,k,cur,mx){var h="";for(var i=0;i<Math.max(mx,0);i++)h+='<i data-b="'+k+'" data-i="'+i+'" class="'+(i<cur?"on":"")+'" role="button" aria-label="Definir '+k.toUpperCase()+" "+(i+1)+'"></i>';$(id).innerHTML=h}
@@ -146,8 +146,8 @@ function upd(){
   ["p1","p2"].forEach(function(k,i){var e=PERS.filter(function(x){return x[0].toLowerCase()===String(s[k]).toLowerCase()})[0];$("h"+(i+1)).textContent=e?e[1]:""});lockUI();$("secbox").style.display=+s.nivel>=8?"":"none";drawSel();save();
 }
 function setp(s,path,v){var p=path.split("."),o=s;for(var i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=v}
-$("app").addEventListener("input",function(e){var t=e.target,k=t.getAttribute("data-k");if(!k)return;var v=t.getAttribute("data-n")?(+t.value||0):t.value;if(k.indexOf("per.")===0){var o0=cur().per[k.slice(4)],er=v>o0?permit(cur(),k.slice(4),v):"";if(er){t.value=String(o0);pmsg(er);return}}setp(cur(),k,v);var m=k.match(/^habs\.(\d+)\.n$/);if(m){var c=CAT.filter(function(x){return x[0].toLowerCase()===String(v).toLowerCase()})[0];if(c){var h=cur().habs[m[1]];h.n=c[0];h.c=c[1];h.e=c[2];var ci=document.querySelector('[data-k="habs.'+m[1]+'.c"]'),ei=document.querySelector('[data-k="habs.'+m[1]+'.e"]');if(ci)ci.value=c[1];if(ei)ei.value=c[2]}}upd()});
-$("app").addEventListener("change",function(e){var t=e.target;if(t.getAttribute("data-k")==="nivel"||t.getAttribute("data-k")==="attr.corpo"||t.getAttribute("data-k")==="attr.vontade"||t.getAttribute("data-k")==="attr.mente"||t.getAttribute("data-k")==="attr.sentidos")upd()});
+$("app").addEventListener("input",function(e){var t=e.target,k=t.getAttribute("data-k");if(!k)return;var v=t.getAttribute("data-n")?(+t.value||0):t.value;if(k.indexOf("per.")===0){var o0=cur().per[k.slice(4)],er=v>o0?permit(cur(),k.slice(4),v):"";if(er){t.value=String(o0);pmsg(er);return}}if(k.indexOf("attr.")===0){var o1=cur().attr[k.slice(5)],e1=permitA(cur(),k.slice(5),v);if(e1){t.value=String(o1);pmsg(e1);return}}setp(cur(),k,v);var m=k.match(/^habs\.(\d+)\.n$/);if(m){var c=CAT.filter(function(x){return x[0].toLowerCase()===String(v).toLowerCase()})[0];if(c){var h=cur().habs[m[1]];h.n=c[0];h.c=c[1];h.e=c[2];var ci=document.querySelector('[data-k="habs.'+m[1]+'.c"]'),ei=document.querySelector('[data-k="habs.'+m[1]+'.e"]');if(ci)ci.value=c[1];if(ei)ei.value=c[2]}}if(t.tagName==="SELECT"&&(k.indexOf("attr.")===0||k.indexOf("per.")===0))draw();else upd()});
+$("app").addEventListener("change",function(e){var t=e.target;if(t.getAttribute("data-k")==="nivel"||t.getAttribute("data-k")==="attr.corpo"||t.getAttribute("data-k")==="attr.vontade"||t.getAttribute("data-k")==="attr.mente"||t.getAttribute("data-k")==="attr.sentidos")(t.getAttribute("data-k")==="nivel"?draw():upd())});
 $("app").addEventListener("click",function(e){
   var t=e.target,s=cur(),a=t.getAttribute("data-pv"),b=t.getAttribute("data-b"),r=t.getAttribute("data-rm");
   if(a){var k=a.slice(0,2),d=+a.slice(2);s[k]+=d;upd()}
@@ -160,11 +160,11 @@ $("novo").addEventListener("click",function(){var b=blank();S.sheets[b.id]=b;S.c
 $("del").addEventListener("click",function(){var s=cur();if(!confirm("Excluir a ficha de "+(s.nome||"sem nome")+"? Gere o código antes se quiser guardar uma cópia."))return;delete S.sheets[S.cur];S.cur=null;load();draw()});
 $("cod").addEventListener("click",function(){$("codebox").classList.toggle("show")});
 function msg(t){$("msg").textContent=t}
-$("gen").addEventListener("click",function(){$("code").value="FICHA1:"+btoa(unescape(encodeURIComponent(JSON.stringify(cur()))));msg("Código gerado. Copie e envie.")});
+$("gen").addEventListener("click",function(){mk(JSON.stringify(cur())).then(function(c){$("code").value=c;msg("Código gerado. Copie e envie.")})});
 $("copy").addEventListener("click",function(){var ta=$("code");if(!ta.value){msg("Gere um código primeiro.");return}ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}
   if(!ok&&navigator.clipboard){navigator.clipboard.writeText(ta.value).then(function(){msg("Copiado.")},function(){msg("Selecione o texto e copie manualmente.")});return}msg(ok?"Copiado.":"Selecione o texto e copie manualmente.")});
 $("imp").addEventListener("click",function(){
-  var v=$("code").value.trim();if(v.indexOf("FICHA1:")!==0){msg("Esse texto não é um código de ficha.");return}
+  var v=$("code").value.trim();if(v.indexOf("FICHA")!==0){msg("Esse texto não é um código de ficha.");return}rd(v).then(function(o){if(!o||!o.id||!o.attr||!o.per)throw 0;var b=blank();o.per=Object.assign(b.per,o.per);o.habs=o.habs||[];S.sheets[o.id]=o;S.cur=o.id;draw();msg("Ficha de "+(o.nome||"sem nome")+" importada.")}).catch(function(){msg("Código inválido. Confira se foi colado por inteiro.")});return
   try{var o=JSON.parse(decodeURIComponent(escape(atob(v.slice(7)))));if(!o||!o.id||!o.attr||!o.per)throw 0;
     var b=blank();o.per=Object.assign(b.per,o.per);o.habs=o.habs||[];S.sheets[o.id]=o;S.cur=o.id;draw();msg("Ficha de "+(o.nome||"sem nome")+" importada.")}
   catch(e){msg("Código inválido. Confira se foi colado por inteiro.")}});
@@ -183,6 +183,15 @@ $("mest").addEventListener("click",function(){var m=$("pwm");if(M){M=false;m.tex
   if(!window.crypto||!crypto.subtle){m.textContent="Este navegador não permite verificar a senha.";return}
   sha(SALT+$("pw").value).then(function(h){if(h===HASH){M=true;$("pw").value="";m.textContent="Modo mestre ativo.";lockUI()}else{m.textContent="Senha incorreta."}})});
 $("pw").addEventListener("keydown",function(e){if(e.key==="Enter")$("mest").click()});
+function permitA(s,k,v){var o=s.attr[k],st=0,d4=0;ATT.forEach(function(a){var x=a[0]===k?v:s.attr[a[0]];if(x===4){d4++;st-=1}else st+=(x-6)/2});var al=2+(s.nivel>=5?1:0);
+  if(v===4&&o!==4&&d4>1)return "Só um atributo pode ficar em d4.";
+  if(v>o){if(v===12&&s.nivel<5)return "O d12 de atributo só é liberado no nível 5.";if(st>al)return "Limite do nível "+s.nivel+": "+al+" passos de atributo. Reduza outro atributo para aumentar este."}
+  return ""}
+function b64u(u){var s="";u.forEach(function(b){s+=String.fromCharCode(b)});return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function unb64u(t){t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";var s=atob(t),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+function pipe(d,C){return new Response(new Blob([d]).stream().pipeThrough(new C("deflate-raw"))).arrayBuffer().then(function(b){return new Uint8Array(b)})}
+function mk(j){if(!window.CompressionStream)return Promise.resolve("FICHA1:"+btoa(unescape(encodeURIComponent(j))));return pipe(new TextEncoder().encode(j),CompressionStream).then(function(u){return "FICHA2:"+b64u(u)})}
+function rd(v){return Promise.resolve().then(function(){if(v.indexOf("FICHA1:")===0)return JSON.parse(decodeURIComponent(escape(atob(v.slice(7)))));return pipe(unb64u(v.slice(7)),DecompressionStream).then(function(u){return JSON.parse(new TextDecoder().decode(u))})})}
 function norm(t){return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
 var AC=null,skip=false;
 function acHide(){$("ac").style.display="none";AC=null}
